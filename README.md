@@ -43,20 +43,34 @@ The server will start at `http://localhost:8000`
 
 Processes various types of inputs (email, PDF, JSON) and returns analysis.
 
-#### Email Processing
+#### Email Processing (Professional Tone)
 ```json
 // Request
 {
-    "email_content": "From: sender@example.com\nSubject: Test Email\n\nThis is a test email content."
+    "email_content": "From: hr@company.com\nSubject: Interview Invitation\n\nDear John,\n\nWe are pleased to invite you for an interview for the Software Engineer position at our New York office. Please reply with your availability by Friday.\n\nBest regards,\nHR Team."
 }
 
 // Expected Response
 {
-    "sender": "sender@example.com",
-    "urgency": "low",
-    "tone": "neutral",
-    "key_points": ["Test email content"],
-    "action_triggered": null
+    "Sender email address": "hr@company.com",
+    "Urgency level": "medium",
+    "Tone": "polite",
+    "Key points or requests": "Invitation for an interview for the Software Engineer position at the New York office. Request to reply with availability by Friday."
+}
+```
+#### Email Processing (Threatening Tone)
+```json
+// Request
+{
+  "email_content": "From: furious.customer@mail.com\nSubject: You Better Fix This Now\n\nI’m tired of being ignored. If this issue isn’t fixed today, I’ll make sure your company’s reputation is ruined across every review site."
+}
+
+// Expected Response
+{
+    "Sender email address": "furious.customer@mail.com",
+    "Urgency level": "high",
+    "Tone": "threatening",
+    "Key points or requests": "Issue must be fixed today or threatens to ruin company's reputation on review sites"
 }
 ```
 
