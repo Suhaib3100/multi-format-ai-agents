@@ -8,6 +8,9 @@ class ClassifierAgent(BaseAgent):
     def __init__(self):
         super().__init__("classifier_agent")
         self.llm = ChatOpenAI(temperature=0)
+        # Define the prompt template for classification.
+        # Using "system" for instructions and "human" for the user's input message.
+        # The {input_text} variable will be replaced with the actual content to classify.
         self.classification_prompt = ChatPromptTemplate.from_messages([
             ("system", """You are an expert at classifying business documents and communications.
             Analyze the input and determine:
@@ -42,22 +45,23 @@ class ClassifierAgent(BaseAgent):
 
     def process(self, input_data: Any) -> Dict[str, Any]:
         """Process input and classify its format and intent."""
-        # Convert input to string if it's not already
+        # Convert input to string if it's not already (handles dict from JSON agent)
         if isinstance(input_data, dict):
             input_text = json.dumps(input_data)
         else:
             input_text = str(input_data)
 
-        # Get classification from LLM
+        # Get classification from LLM using the defined prompt
         chain = self.classification_prompt | self.llm
         result = chain.invoke({"input_text": input_text})
         
         try:
+            # Parse the LLM's JSON output
             classification = json.loads(result.content)
-            # Validate format
+            # Validate format against expected types
             if classification["format"] not in ["email", "pdf", "json"]:
                 classification["format"] = "unknown"
-            # Validate intent
+            # Validate intent against expected types
             if classification["intent"] not in ["RFQ", "Invoice", "Complaint", "Regulation", "Fraud Risk"]:
                 classification["intent"] = "unknown"
         except json.JSONDecodeError:
@@ -67,7 +71,7 @@ class ClassifierAgent(BaseAgent):
                 "intent": "unknown"
             }
 
-        # Log the classification with metadata
+        # Log the classification activity
         self.log_activity(
             source="classifier",
             classification=classification,

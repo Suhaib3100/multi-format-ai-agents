@@ -8,6 +8,9 @@ class EmailAgent(BaseAgent):
     def __init__(self):
         super().__init__("email_agent")
         self.llm = ChatOpenAI(temperature=0)
+        # Define the prompt template for email analysis.
+        # Using "system" for instructions and "human" for the user's email input.
+        # The {input_text} variable will contain the email content to analyze.
         self.analysis_prompt = ChatPromptTemplate.from_messages([
             ("system", """You are an expert at analyzing business emails.
             Extract the following information:
@@ -22,13 +25,15 @@ class EmailAgent(BaseAgent):
 
     def process(self, input_data: str) -> Dict[str, Any]:
         """Process email content and extract relevant information."""
-        # Get analysis from LLM
+        # Get analysis from LLM using the defined prompt.
         chain = self.analysis_prompt | self.llm
         result = chain.invoke({"input_text": input_data})
         
         try:
+            # Parse the LLM's JSON output.
             analysis = json.loads(result.content)
         except json.JSONDecodeError:
+            # Fallback analysis if LLM output isn't valid JSON.
             analysis = {
                 "sender": "unknown",
                 "urgency": "unknown",
@@ -36,12 +41,12 @@ class EmailAgent(BaseAgent):
                 "key_points": []
             }
 
-        # Determine if escalation is needed
+        # Determine if escalation is needed based on the detected tone.
         action_triggered = None
         if analysis.get("tone") in ["angry", "threatening"]:
             action_triggered = "POST /crm/escalate"
 
-        # Log the analysis
+        # Log the email analysis activity.
         self.log_activity(
             source="email",
             classification={"format": "email", "intent": "communication"},
@@ -50,7 +55,7 @@ class EmailAgent(BaseAgent):
             agent_trace=["Email analysis completed", f"Tone detected: {analysis.get('tone')}"]
         )
 
-        # Add action_triggered to the response if present
+        # Add action_triggered to the response if present for the ActionRouter.
         if action_triggered:
             analysis["action_triggered"] = action_triggered
 

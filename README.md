@@ -41,6 +41,10 @@ The server will start at `http://localhost:8000`
 
 ## Architecture and Agent Logic
 
+Below is a visual diagram illustrating the system's architecture and agent workflow:
+
+![Project Architecture Diagram](architechture.png)
+
 The system follows a modular, agent-based architecture designed to process and analyze diverse input formats efficiently. The core components are:
 
 1.  **FastAPI Application (`main.py`)**: This serves as the entry point, exposing REST API endpoints (`/process`, `/process/pdf`, `/activity`). It receives incoming requests, routes them to the appropriate agents based on input type and format, and returns the final results.
@@ -54,8 +58,6 @@ The system follows a modular, agent-based architecture designed to process and a
     *   **`ActionRouter`**: Receives the output from specialized agents. If an agent's analysis includes a `action_triggered` field, the Action Router processes this trigger. It acts as a dispatcher to simulated (or potentially real, in a production setting) follow-up actions like escalating issues or creating tickets based on the specific trigger (e.g., different risk levels).
 
 3.  **Memory Store (`memory/memory_store.py`)**: Manages the logging of all processing activities, classifications, extracted data, and triggered actions to an SQLite database. This provides a history of all processed inputs and system responses, accessible via the `/activity` endpoints.
-
-## Architechture (Visual)
 
 ## API Endpoints
 
@@ -171,6 +173,19 @@ GET /activity/1
 }
 ```
 
+## Postman Collection
+
+For easy testing of all API endpoints, a Postman collection is available in the project root directory:
+
+- File: `postman_collection.json`
+
+To use the collection:
+
+1. Open Postman.
+2. Click the `Import` button.
+3. Select the `postman_collection.json` file from your project directory.
+4. The collection will be imported, and you can then explore and run the predefined requests for each endpoint.
+
 ## Action Routing
 
 The system includes an `ActionRouter` that processes the output of the specialized agents. When an agent identifies a condition that requires a follow-up step (indicated by the `action_triggered` field in its output), the Action Router intercepts this and simulates performing a predefined action.
@@ -179,9 +194,9 @@ This acts as a placeholder for integration with external systems like CRM, ticke
 
 Currently, the `ActionRouter` is configured to simulate actions based on risk levels triggered by the agents:
 
-- **General Risk Alert (`POST /risk_alert`)**: Simulated logging of a general alert.
-- **High Risk Alert (`POST /risk_alert/high`)**: Simulated **escalation of the issue**. The simulated response includes an `escalation_ref`.
-- **Critical Risk Alert (`POST /risk_alert/critical`)**: Simulated **creation of a high-priority ticket** and **flagging for compliance risk**. The simulated response includes a `ticket_id` and a `compliance_flagged` status.
+-   **General Risk Alert (`POST /risk_alert`)**: Simulated logging of a general alert.
+-   **High Risk Alert (`POST /risk_alert/high`)**: Simulated **escalation of the issue**. The simulated response includes an `escalation_ref`.
+-   **Critical Risk Alert (`POST /risk_alert/critical`)**: Simulated **creation of a high-priority ticket** and **flagging for compliance risk**. The simulated response includes a `ticket_id` and a `compliance_flagged` status.
 
 When an action is triggered and processed by the `ActionRouter`, the response from the `/process` or `/process/pdf` endpoint will include an `action_result` field containing the details of the simulated action.
 

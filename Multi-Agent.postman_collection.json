@@ -1,0 +1,97 @@
+{
+	"info": {
+		"_postman_id": "1f83c7cf-5c66-4c87-9d33-e884c14857ca",
+		"name": "Multi-Agent",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34708779",
+		"_collection_link": "https://multi-agent-2084.postman.co/workspace/bb5798ab-7826-4c53-8b6f-b2e51f8b1021/collection/34708779-1f83c7cf-5c66-4c87-9d33-e884c14857ca?action=share&source=collection_link&creator=34708779"
+	},
+	"item": [
+		{
+			"name": "Activity",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Process-Email",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "   {\r\n       \"json_data\": \"{\\\"event_type\\\": \\\"unauthorized_access\\\", \\\"timestamp\\\": \\\"2024-03-15T10:30:00Z\\\", \\\"source\\\": \\\"security_system\\\", \\\"data\\\": {\\\"id\\\": \\\"123\\\", \\\"user_id\\\": \\\"user456\\\", \\\"ip_address\\\": \\\"192.168.1.1\\\", \\\"attempted_resource\\\": \\\"/api/admin\\\"}}\"\r\n   }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/process",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"process"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Json Validation",
+			"request": {
+				"method": "POST",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "PDF-process",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "multipart/form-data",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/Users/suhai/Downloads/sample.pdf"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8000/process/pdf",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"process",
+						"pdf"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
