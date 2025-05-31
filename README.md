@@ -10,6 +10,11 @@ A FastAPI-based system that processes and analyzes various types of business doc
 - Activity logging and tracking
 - Risk assessment and automated action triggering
 
+## Architecture and Agent Logic
+
+Below is a visual diagram illustrating the system's architecture and agent workflow:
+
+![Project Architecture Diagram](architechture.png)
 ## Setup
 
 This is a basic Python project utilizing LLMs via the OpenAI API. The setup is straightforward:
@@ -21,11 +26,6 @@ This is a basic Python project utilizing LLMs via the OpenAI API. The setup is s
 
 The server will start at `http://localhost:8000`.
 
-## Architecture and Agent Logic
-
-Below is a visual diagram illustrating the system's architecture and agent workflow:
-
-![Project Architecture Diagram](architechture.png)
 
 The system follows a modular, agent-based architecture designed to process and analyze diverse input formats efficiently. The core components are:
 
