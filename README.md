@@ -12,32 +12,14 @@ A FastAPI-based system that processes and analyzes various types of business doc
 
 ## Setup
 
-1. Create and activate a virtual environment:
-```bash
-python -m venv venv
-.\venv\Scripts\activate  # Windows
-source venv/bin/activate  # Linux/Mac
-```
+This is a basic Python project utilizing LLMs via the OpenAI API. The setup is straightforward:
 
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+1.  Clone the repository.
+2.  Install dependencies (`pip install -r requirements.txt`).
+3.  Ensure your OpenAI API key is configured (e.g., via environment variables).
+4.  Run the main application file (`python main.py`).
 
-3. Set up environment variables (optional):
-Create a `.env` file in the root directory:
-```
-DATABASE_URL=memory/activity_log.db
-# OPENAI_API_KEY=your_openai_api_key # Add your OpenAI API key here
-```
-**Note:** An OpenAI API key is required for the AI agents to function.
-
-4. Run the server:
-```bash
-python main.py
-```
-
-The server will start at `http://localhost:8000`
+The server will start at `http://localhost:8000`.
 
 ## Architecture and Agent Logic
 
@@ -58,6 +40,8 @@ The system follows a modular, agent-based architecture designed to process and a
     *   **`ActionRouter`**: Receives the output from specialized agents. If an agent's analysis includes a `action_triggered` field, the Action Router processes this trigger. It acts as a dispatcher to simulated (or potentially real, in a production setting) follow-up actions like escalating issues or creating tickets based on the specific trigger (e.g., different risk levels).
 
 3.  **Memory Store (`memory/memory_store.py`)**: Manages the logging of all processing activities, classifications, extracted data, and triggered actions to an SQLite database. This provides a history of all processed inputs and system responses, accessible via the `/activity` endpoints.
+
+
 
 ## API Endpoints
 
@@ -173,6 +157,58 @@ GET /activity/1
 }
 ```
 
+## Testing with curl
+
+1. Process JSON (Email Input):
+```bash
+curl -X POST "http://localhost:8000/process" \
+     -H "Content-Type: application/json" \
+     -d '{"email_content": "From: sender@example.com\nSubject: Test Email\n\nThis is a test email content."}'
+```
+
+2. Process JSON (JSON Data Input - triggers high risk action):
+```bash
+curl -X POST "http://localhost:8000/process" \
+     -H "Content-Type: application/json" \
+     -d '{"json_data": "{\"event_type\": \"unauthorized_access\", \"timestamp\": \"2024-03-15T10:30:00Z\", \"source\": \"security_system\", \"data\": {\"id\": \"123\", \"user_id\": \"user456\", \"ip_address\": \"192.168.1.1\", \"attempted_resource\": \"/api/admin\"}}"}'
+```
+
+3. Process PDF File:
+```bash
+curl.exe -X POST "http://localhost:8000/process/pdf" \
+     -F "file=@samples/Suhaib Resume.pdf"
+```
+(Note: Use `curl.exe` on Windows PowerShell)
+
+4. Get All Activities:
+```bash
+curl "http://localhost:8000/activity"
+```
+
+5. Get Specific Activity:
+```bash
+curl "http://localhost:8000/activity/1"
+```
+
+## Demo Screenshots
+
+Here are some screenshots illustrating the API endpoints being tested in Postman:
+
+### Processing Email Input
+![Processing Email Input](demo/Process-Email.png)
+
+### Processing JSON Input (Validation Example)
+![Processing JSON Input (Validation Example)](demo/Json-Validation.png)
+
+### Processing PDF File Upload
+![Processing PDF File Upload](demo/Pdf-Process.png)
+
+### Retrieving All Activities
+![Retrieving All Activities](demo/All-Activities.png)
+
+### Retrieving a Specific Activity
+![Retrieving a Specific Activity](demo/Specific-Activity.png)
+
 ## Postman Collection
 
 For easy testing of all API endpoints, a Postman collection is available in the project root directory:
@@ -217,39 +253,6 @@ When an action is triggered and processed by the `ActionRouter`, the response fr
 // 500 Internal Server Error (example - includes LLM errors)
 { "detail": "Error message here" }
 { "detail": "Error code: 400 - {'error': {'message': \"This model's maximum context length is..."}}"}
-```
-
-## Testing with curl
-
-1. Process JSON (Email Input):
-```bash
-curl -X POST "http://localhost:8000/process" \
-     -H "Content-Type: application/json" \
-     -d '{"email_content": "From: sender@example.com\nSubject: Test Email\n\nThis is a test email content."}'
-```
-
-2. Process JSON (JSON Data Input - triggers high risk action):
-```bash
-curl -X POST "http://localhost:8000/process" \
-     -H "Content-Type: application/json" \
-     -d '{"json_data": "{\"event_type\": \"unauthorized_access\", \"timestamp\": \"2024-03-15T10:30:00Z\", \"source\": \"security_system\", \"data\": {\"id\": \"123\", \"user_id\": \"user456\", \"ip_address\": \"192.168.1.1\", \"attempted_resource\": \"/api/admin\"}}"}'
-```
-
-3. Process PDF File:
-```bash
-curl.exe -X POST "http://localhost:8000/process/pdf" \
-     -F "file=@samples/Suhaib Resume.pdf"
-```
-(Note: Use `curl.exe` on Windows PowerShell)
-
-4. Get All Activities:
-```bash
-curl "http://localhost:8000/activity"
-```
-
-5. Get Specific Activity:
-```bash
-curl "http://localhost:8000/activity/1"
 ```
 
 ## Project Structure

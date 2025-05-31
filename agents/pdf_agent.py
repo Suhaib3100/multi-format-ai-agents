@@ -13,6 +13,7 @@ class PDFAgent(BaseAgent):
     def __init__(self):
         super().__init__("pdf_agent")
         self.llm = ChatOpenAI(temperature=0)
+        # Prompt template for PDF analysis. Uses a 'human' message for the input text.
         self.analysis_prompt = ChatPromptTemplate.from_messages([
             ("system", """You are an expert at analyzing business documents in PDF format.
             Extract the following information:
@@ -22,19 +23,18 @@ class PDFAgent(BaseAgent):
             4. Monetary amounts (if any)
             5. Regulatory references (GDPR, FDA, etc.)
             
-            Return your analysis in JSON format with these fields."""),
+            Return your analysis in JSON format with these fields."""
+            ),
             ("human", "Analyze this document: {input_text}")
         ])
-        # Reduced maximum characters to send to the LLM for debugging context length issue
+        # Limit on the number of characters sent to the language model to avoid exceeding token limits.
         self.max_text_length = 2000 
 
     def _extract_text_from_pdf(self, pdf_data: bytes) -> str:
         """Extract text content from PDF bytes."""
         try:
-            # Use PyPDF2.PdfReader for reading
             pdf_reader = PyPDF2.PdfReader(io.BytesIO(pdf_data))
             text = ""
-            # You could add logic here to limit pages if needed, but truncating later is simpler
             for page in pdf_reader.pages:
                 text += page.extract_text() + "\n"
             return text
@@ -43,11 +43,10 @@ class PDFAgent(BaseAgent):
             return f"Error extracting PDF text: {str(e)}"
 
     def process(self, input_data: bytes) -> Dict[str, Any]:
-        """Process PDF content and extract relevant information."""
-        # Extract text from PDF
+        """Process PDF content and extract relevant information using LLM."""
         pdf_text = self._extract_text_from_pdf(input_data)
 
-        # Truncate text if it exceeds the maximum length
+        # Apply the text length limit before sending to the LLM.
         original_length = len(pdf_text)
         if original_length > self.max_text_length:
             pdf_text = pdf_text[:self.max_text_length]
@@ -55,17 +54,16 @@ class PDFAgent(BaseAgent):
 
         logger.info(f"Length of text being sent to LLM: {len(pdf_text)} characters.")
         
-        # Get analysis from LLM
         chain = self.analysis_prompt | self.llm
-        
-        # Ensure input_text is a string
         input_payload = {"input_text": str(pdf_text)}
 
         try:
+            # Invoke the language model chain and parse the JSON response.
             result = chain.invoke(input_payload)
             analysis = json.loads(result.content)
         except Exception as e:
             logger.error(f"Error during LLM analysis or JSON parsing: {str(e)}")
+            # Provide a default empty analysis on error.
             analysis = {
                 "document_type": "unknown",
                 "key_terms": [],
@@ -73,28 +71,26 @@ class PDFAgent(BaseAgent):
                 "monetary_amounts": [],
                 "regulatory_references": []
             }
-            # Re-raise or handle specifically if needed, for now return default analysis
 
-        # Check for high-value invoices or regulatory content (basic example)
+        # Determine if a risk-based action should be triggered.
         action_triggered = None
+        # (Basic example logic - can be expanded based on analysis content)
         if analysis.get("document_type") == "invoice":
             amounts = analysis.get("monetary_amounts", [])
-            # Ensure amounts are treated as numbers for comparison
             numeric_amounts = []
             for amount in amounts:
                 try:
                     numeric_amounts.append(float(amount))
                 except (ValueError, TypeError):
-                    continue # Skip if not a valid number
+                    continue 
 
             if any(amount > 10000 for amount in numeric_amounts):
                 action_triggered = "POST /risk_alert"
 
-        # Basic check for regulatory references
         if any(ref in "GDPR FDA" for ref in analysis.get("regulatory_references", [])):
              action_triggered = "POST /risk_alert"
 
-        # Log the analysis
+        # Log the PDF analysis activity.
         self.log_activity(
             source="pdf",
             classification={"format": "pdf", "intent": analysis.get("document_type", "unknown")},
