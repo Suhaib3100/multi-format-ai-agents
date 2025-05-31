@@ -25,7 +25,8 @@ class PDFAgent(BaseAgent):
             Return your analysis in JSON format with these fields."""),
             ("human", "Analyze this document: {input_text}")
         ])
-        self.max_text_length = 10000 # Maximum characters to send to the LLM
+        # Reduced maximum characters to send to the LLM for debugging context length issue
+        self.max_text_length = 2000 
 
     def _extract_text_from_pdf(self, pdf_data: bytes) -> str:
         """Extract text content from PDF bytes."""
@@ -51,6 +52,8 @@ class PDFAgent(BaseAgent):
         if original_length > self.max_text_length:
             pdf_text = pdf_text[:self.max_text_length]
             logger.warning(f"Truncated PDF text from {original_length} to {self.max_text_length} characters.")
+
+        logger.info(f"Length of text being sent to LLM: {len(pdf_text)} characters.")
         
         # Get analysis from LLM
         chain = self.analysis_prompt | self.llm
