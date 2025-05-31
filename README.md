@@ -78,7 +78,7 @@ Processes various types of inputs (email, PDF, JSON) and returns analysis.
 ```json
 // Request
 {
-    "json_data": "{\"event_type\": \"unauthorized_access\", \"timestamp\": \"2024-03-15T10:30:00Z\", \"source\": \"security_system\", \"data\": {\"id\": \"123\", \"user_id\": \"user456\", \"ip_address\": \"192.168.1.1\", \"attempted_resource\": \"/api/admin\"}}"
+       "json_data": "{\"event_type\": \"unauthorized_access\", \"timestamp\": \"2024-03-15T10:30:00Z\", \"source\": \"security_system\", \"data\": {\"id\": \"123\", \"user_id\": \"user456\", \"ip_address\": \"192.168.1.1\", \"attempted_resource\": \"/api/admin\"}}"
 }
 
 // Expected Response
@@ -92,12 +92,22 @@ Processes various types of inputs (email, PDF, JSON) and returns analysis.
             "id": "123",
             "user_id": "user456",
             "ip_address": "192.168.1.1",
-            "attempted_resource": "/api/admin"
+            "attempted_resource": "/api/admin",
+            "amount": null,
+            "location": null,
+            "device_info": null
         }
     },
-    "anomalies": ["suspicious_event: unauthorized_access"],
-    "risk_level": "high",
-    "action_triggered": "POST /risk_alert/high"
+    "anomalies": [
+        "suspicious_event: unauthorized_access",
+        "stale_event"
+    ],
+    "risk_level": "medium",
+    "action_triggered": "POST /risk_alert/medium",
+    "action_result": {
+        "status": "unknown_action",
+        "action": "POST /risk_alert/medium"
+    }
 }
 ```
 
