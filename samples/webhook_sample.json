@@ -1,0 +1,17 @@
+{
+    "event_type": "unauthorized_access",
+    "timestamp": "2024-03-15T10:30:00Z",
+    "source": "security_system",
+    "data": {
+        "id": "SEC-12345",
+        "user_id": "user789",
+        "ip_address": "192.168.1.100",
+        "attempted_resource": "/api/admin/users",
+        "amount": 15000.00,
+        "location": "Unknown",
+        "device_info": {
+            "browser": "Chrome",
+            "os": "Windows 10"
+        }
+    }
+} 
